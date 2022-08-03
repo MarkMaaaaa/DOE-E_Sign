@@ -4,7 +4,7 @@ import cv2 as cv
 
 # Read image
 image = cv.imread("data/images/panel.jpg")
-# image = cv.imread('panel_circ.jpg')
+# image = cv.imread('data/images/panel_circ.jpg')
 
 # Denoise image
 blur = cv.GaussianBlur(image, (5,5), 0)
@@ -47,6 +47,12 @@ for i, c in enumerate(contours):
     # Filter by Counter Perimeter
     perimeter = cv.arcLength(c, True)
     if perimeter < 60 or perimeter > 100:
+        contours.pop(i)
+        continue
+
+    # Filter by Contour Shape
+    approx = cv.approxPolyDP(c, 0.03*perimeter, True)
+    if not len(approx) == 4:
         contours.pop(i)
         continue
 
