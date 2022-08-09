@@ -5,7 +5,7 @@ import cv2 as cv
 
 
 # Read the image in grayscale
-image = cv.imread("image.jpg")
+image = cv.imread("data/images/panel-raw.jpg")
 gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 # blur = cv.medianBlur(gray, 5)
 
@@ -23,7 +23,7 @@ t_lower = 50  # Lower Threshold
 t_upper = 150  # Upper threshold
   
 edge = cv.Canny(binary, t_lower, t_upper)
-# cv.imshow('edge detection', edge)
+cv.imshow('edge detection', edge)
 
 
 # Hough Transform
