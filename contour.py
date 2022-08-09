@@ -1,4 +1,3 @@
-import re
 import numpy as np
 import cv2 as cv
 
@@ -11,39 +10,34 @@ max_perimeter = 4*max_side
 
 
 # Read image
-image = cv.imread("data/images/panel.jpg")
-# image = cv.imread('data/images/panel_circ.jpg')
+image = cv.imread("data/images/image.jpg")
+
+
+# ------------------ Preprocessing --------------------- #
 
 # Denoise image
-blur = cv.GaussianBlur(image, (5,5), 0)
-
-# Gray scale
-grayImage = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
+# Remove noises by Gaussian filter
+mask = cv.GaussianBlur(image, (5,5), 0)
 
 # Binary image
 lower_bound = np.array([0,0,10])
 upper_bound = np.array([255,255,195])
-binary = cv.inRange(blur, lower_bound, upper_bound)
-# cv.imshow('binary', binary)
+mask = cv.inRange(mask, lower_bound, upper_bound)
 
-# Kernel
-kernel = np.ones((3, 3), np.uint8)
+# Enhance the mask by using Morphological transfomation
+# This is an operation based on the shape of an image
+kernel = np.ones((3, 3), np.uint8)      # Kernel
 
-# Erosion and dialation
-mask = cv.erode(binary, kernel, iterations=6)
-mask = cv.dilate(mask, kernel, iterations=3)
-# cv.imshow('mask', mask)
+mask = cv.erode(mask, kernel, iterations=6)     # Erosion
+mask = cv.dilate(mask, kernel, iterations=3)    # Dilation
+mask = np.invert(mask)                          # Inverse Binary
 
-# Inverse Binary
-mask = np.invert(mask)
-# cv.imshow('invers mask', mask)
+# ------------------ Contours --------------------- #
 
-# Find contours
+# Find all contours in the image based on the mask
 contours, hierarchy = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-contours = sorted(contours, key=lambda x:cv.boundingRect(x)[0] + cv.boundingRect(x)[1] * image.shape[1])
-# print(contours)
 
-# Filter contours 
+# Remove all contours that detect by mistake
 for i, c in enumerate(contours):
      # Filter by Counter Area
     areaContour=cv.contourArea(c)   # Calculate area of contour
@@ -63,16 +57,43 @@ for i, c in enumerate(contours):
         contours.pop(i)
         continue
 
+# Sort contours
+
+# TO-DO:
+# This sort is not necessery, but we need to convert contours from tuple to list
+# There should be a better way than sorted function
+contours = sorted(contours, key=lambda x:cv.boundingRect(x)[1])         # Convert tuple to list
+
+# Classify contours based on the row that they belong
+row = 0
+sorted_contours = [[], [], [], [], [], [], [], []]
+cx0, cy0 = cv.minAreaRect(contours[0])[0]
+for c in contours:
+    cx, cy = cv.minAreaRect(c)[0]
+    print(cx, cy)
+    if abs(cy0-cy) > 5.0:
+        cx0, cy0 = cx, cy
+        row += 1
+    sorted_contours[row].append(c)
+
+# Sort contours in a row from left to right
+i = 0
+for row in sorted_contours:
+    row = sorted(row, key=lambda x:cv.boundingRect(x)[0])
+    for c in row:
+        contours[i] = c 
+        i += 1        
+
 # Draw contours
 cv.drawContours(image, contours, contourIdx=-1, color=(125, 125, 0), thickness=2)
 
 # Label contours
 for i, c in enumerate(contours):
-    rect = cv.minAreaRect(c)
-    print(i+1, rect)
+    # Claculate the coordinates of the label
     M = cv.moments(c)
     cx = int(M['m10']/M['m00'])
     cy = int(M['m01']/M['m00'])
+    # Draw the label
     cv.putText(image, text=str(i+1), org=(cx,cy),
             fontFace= cv.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0,0,255),
             thickness=2, lineType=cv.LINE_AA)
@@ -86,22 +107,53 @@ for i, c in enumerate(contours):
 # max_size = max(size)
 # print(min_size, max_size)
 
-panel = np.zeros((8,32))
 
-# # Positiong
-# first_bit = cv.minAreaRect(contours[0])[0]
-# # print(first_bit)
-# for i, c in enumerate(contours):
-#     if i >= len(contours)-1:
-#         break
-#     centroid_curr = cv.minAreaRect(c)[0]
-#     centroid_next = cv.minAreaRect(contours[i+1])[0]
-#     print(centroid_curr)
-#     # print(centroid_next)
-#     if abs(centroid_curr[0] - first_bit[0]) > 10:
-#         print("___________________________________________________________")
-#         first_bit = centroid_curr
-#         continue
+# ------------------ Positioning --------------------- #
+
+# Positiong
+panel = np.zeros((8,32))
+# contours_matrix = [[0 for i in range(10)] for j in range(32)]
+# print(contours_matrix)
+ref_bit = cv.minAreaRect(contours[0])[0]    # This bit is the leftest toppest bit in the panel and always is on
+row, col = (0, 0)
+panel[0][0] = 1
+
+# print(first_bit)
+for i, c in enumerate(contours):
+    if i >= len(contours)-1:
+        break
+    centroid_curr = cv.minAreaRect(c)[0]
+    centroid_next = cv.minAreaRect(contours[i+1])[0]
+
+    # print(abs(centroid_curr[0] - centroid_next[0])/20)
+    print(i+1, centroid_curr)
+
+    if abs(centroid_curr[1] - centroid_next[1]) > 30:       # End of row
+        # ref_bit = centroid_curr
+        row += 1
+        # col = 0 
+        # Find location of first 1bit of next line based on the reference bit
+        # first_bit = (centroid_next[0], ref_bit[1])      # Location of first bit in next row
+        col = round(abs(ref_bit[0] - centroid_next[0])/20)       # Distance between first bit of next row with the first 1bit  
+        # panel[row][col] = 1
+        # print("*", i+1, centroid_curr)
+        print("___________________________________________________________")
+        # continue
+    else:
+        dist = round(abs(centroid_curr[0] - centroid_next[0])/20)
+        print(dist)
+        col = col+dist
+    
+    # panel[row][col] = 1
+# print(panel)
+    
+
+
+
+    
+
+    # if i >= len(contours)-1:
+    #     break
  
 # Show result
 cv.imshow("preprocessed", image)
