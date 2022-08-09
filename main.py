@@ -1,8 +1,7 @@
 """
-****** IMPORTANT *******
 This example will run on Python3.8 and OpenCV4.
 
-
+****** IMPORTANT *******
 There are some assumptions:
   1. The input is the result of yolo sign detection (ex. data/images/panel.jpg)
   2. The top left bit is always on
@@ -17,7 +16,7 @@ Usage:
     python3 main.py --source path/to/image
     
     Example:
-        python3 main.py --source data/images/image.jpg
+        python3 main.py --source data/images/panel.jpg
 
     or use default path:
         python3 main.py
