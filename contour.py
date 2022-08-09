@@ -1,3 +1,4 @@
+
 import numpy as np
 import cv2 as cv
 
@@ -70,7 +71,6 @@ sorted_contours = [[], [], [], [], [], [], [], []]
 cx0, cy0 = cv.minAreaRect(contours[0])[0]
 for c in contours:
     cx, cy = cv.minAreaRect(c)[0]
-    print(cx, cy)
     if abs(cy0-cy) > 5.0:
         cx0, cy0 = cx, cy
         row += 1
@@ -112,46 +112,27 @@ for i, c in enumerate(contours):
 
 # Positiong
 panel = np.zeros((8,32))
-# contours_matrix = [[0 for i in range(10)] for j in range(32)]
-# print(contours_matrix)
-ref_bit = cv.minAreaRect(contours[0])[0]    # This bit is the leftest toppest bit in the panel and always is on
-row, col = (0, 0)
+row, col = (0, 0)       # Panel's row and column indicator
+cx0, cy0 = cv.minAreaRect(contours[0])[0]    # Left-top bit in the panel - always is on
 panel[0][0] = 1
-
-# print(first_bit)
 for i, c in enumerate(contours):
     if i >= len(contours)-1:
         break
-    centroid_curr = cv.minAreaRect(c)[0]
-    centroid_next = cv.minAreaRect(contours[i+1])[0]
+    cx, cy = cv.minAreaRect(c)[0]                   # Coordination of current bit's center
+    cx1, cy1 = cv.minAreaRect(contours[i+1])[0]     # Coordination of next bit's center
 
-    # print(abs(centroid_curr[0] - centroid_next[0])/20)
-    print(i+1, centroid_curr)
-
-    if abs(centroid_curr[1] - centroid_next[1]) > 30:       # End of row
-        # ref_bit = centroid_curr
+    if abs(cy - cy1) > 30:       # End of row
         row += 1
-        # col = 0 
-        # Find location of first 1bit of next line based on the reference bit
-        # first_bit = (centroid_next[0], ref_bit[1])      # Location of first bit in next row
-        col = round(abs(ref_bit[0] - centroid_next[0])/20)       # Distance between first bit of next row with the first 1bit  
-        # panel[row][col] = 1
-        # print("*", i+1, centroid_curr)
-        print("___________________________________________________________")
-        # continue
+        col = round(abs(cx0 - cx1)/20)       # Distance between first bit of next row with the first 1bit  
+
     else:
-        dist = round(abs(centroid_curr[0] - centroid_next[0])/20)
-        print(dist)
+        dist = round(abs(cx - cx1)/20)
         col = col+dist
     
-    # panel[row][col] = 1
-# print(panel)
+    panel[row][col] = 1
+
+print(panel)
     
-
-
-
-    
-
     # if i >= len(contours)-1:
     #     break
  
