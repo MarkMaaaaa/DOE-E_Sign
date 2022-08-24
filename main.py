@@ -29,6 +29,7 @@ import sys
 from pathlib import Path
 
 from utils.contour import bit_detecttion
+from utils.homography import homography
 
 
 FILE = Path(__file__).resolve()
@@ -47,6 +48,8 @@ def parse_opt():
 
 def main(opt):
     bit_detecttion(**vars(opt))
+    # corners = [[35,462], [248,233], [216,568], [400,277]]
+    # homography('data/images/perspective.jpg', corners)
 
 
 if __name__ == "__main__":

@@ -3,12 +3,12 @@
 This example will run on Python3.8 and OpenCV4.
 
 There are some assumptions:
-  1. The input is the result of yolo sign detection (ex. data/images/panel.jpg)
+  1. The input is the result of YOLO sign detection (example: data/images/panel.jpg)
   2. The top left bit is always on
   3. The resolution is high enough
   4. The image size is 640x320
-  5. There is no rotation in image
-  6. There is no prespective in image
+  5. There is no rotation in the image
+  6. There is no perspective in the image
   7. All panels are the same size (64x32)
 
 
