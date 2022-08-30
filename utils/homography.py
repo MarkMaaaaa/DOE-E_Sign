@@ -1,7 +1,12 @@
 import cv2 as cv
 import numpy as np
 
-def homography(source, corners=[[8, 14], [763, 17], [24, 379], [742, 392]], save=False, output="data/images/panel1.jpg"):
+def homography(source, 
+               corners, 
+               save=False, 
+               output="data/images/panel.jpg",
+               output_size=(1920,320)
+               ):
 
     # Read source image.
     im_src = cv.imread(source)
@@ -18,12 +23,14 @@ def homography(source, corners=[[8, 14], [763, 17], [24, 379], [742, 392]], save
     # pts_src = np.array([[8, 14], [763, 17], [24, 379], [742, 392]])
     pts_src = np.array(corners)
 
+    width, height = output_size[0], output_size[1]
+
     # Read destination image.
-    im_dst = cv.resize(im_src, (640, 320),
+    im_dst = cv.resize(im_src, (width, height),
                interpolation = cv.INTER_NEAREST)
 
     # Four corners of the book in destination image.
-    pts_dst = np.array([[0, 0],[640, 0],[0, 320],[640, 320]])
+    pts_dst = np.array([[0, 0],[width, 0],[0, height],[width, height]])
 
     # Calculate Homography
     h, status = cv.findHomography(pts_src, pts_dst)
