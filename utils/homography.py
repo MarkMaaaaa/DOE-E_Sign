@@ -15,6 +15,8 @@ def homography(source,
     width = int(im_src.shape[1] * scale_percent / 100)
     height = int(im_src.shape[0] * scale_percent / 100)
     dim = (width, height)
+    # dim = im_src.shape
+
     
     # resize image
     im_src = cv.resize(im_src, dim, interpolation = cv.INTER_AREA)

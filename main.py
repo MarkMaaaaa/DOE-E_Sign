@@ -51,8 +51,8 @@ def main(opt):
     # # To crop the image, uncomment this part.
     # # You need to find the four corners of the the panel manually.
     # # The corners are top-left, top-right, bottom-left, and bottom-right of panel respectively.
-    # corners = [[82,168], [657,174], [86,266], [654,266]]
-    # homography('data/images/polar.jpg', corners, save=True, output='data/images/panel1.jpg')
+    # corners = [[3,5], [79,6], [2,18], [79,19]]
+    # homography('data/images/test4.jpeg', corners, save=True, output='data/images/hd4.jpg')
 
 if __name__ == "__main__":
     opt = parse_opt()

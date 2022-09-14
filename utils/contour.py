@@ -23,9 +23,16 @@ def bit_detecttion(source='data/images/panel.jpg'):
     mask = cv.GaussianBlur(image, (5,5), 0)
 
     # Binary image
-    lower_bound = np.array([0,0,10])
-    upper_bound = np.array([255,255,195])
-    mask = cv.inRange(mask, lower_bound, upper_bound)
+    lower_bound = np.array([0,100,100])
+    upper_bound = np.array([179,255,255])
+    # Convert to HSV format and color threshold
+    hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+    # mask = cv.inRange(hsv, lower, upper)
+    # result = cv.bitwise_and(image, image, mask=mask)
+
+    mask = cv.inRange(hsv, lower_bound, upper_bound)
+    # cv.imshow("mask0", mask)
+
 
     # Enhance the mask by using Morphological transfomation
     # This is an operation based on the shape of an image
@@ -33,7 +40,7 @@ def bit_detecttion(source='data/images/panel.jpg'):
 
     mask = cv.erode(mask, kernel, iterations=5)     # Erosion
     mask = cv.dilate(mask, kernel, iterations=3)    # Dilation
-    mask = np.invert(mask)                          # Inverse Binary
+    # mask = np.invert(mask)                          # Inverse Binary
 
     # cv.imshow("mask", mask)
 
@@ -72,15 +79,33 @@ def bit_detecttion(source='data/images/panel.jpg'):
  
 
     # Classify contours based on the row that they belong
+    # row = 0
+    # sorted_contours = [[], [], [], [], [], [], [], []]
+    # # sorted_contours = [[], [], [], [], []]
+    # cx0, cy0 = cv.minAreaRect(contours[0])[0]
+    # for c in contours:
+    #     cx, cy = cv.minAreaRect(c)[0]
+    #     if abs(cy0-cy) > 20.0:
+    #         cx0, cy0 = cx, cy
+    #         row += 1
+    #     sorted_contours[row].append(c)
     row = 0
     sorted_contours = [[], [], [], [], [], [], [], []]
     # sorted_contours = [[], [], [], [], []]
     cx0, cy0 = cv.minAreaRect(contours[0])[0]
     for c in contours:
         cx, cy = cv.minAreaRect(c)[0]
-        if abs(cy0-cy) > 20.0:
-            cx0, cy0 = cx, cy
-            row += 1
+        if 10 < cy < 70:
+            row = 0
+        elif 90 < cy < 150:
+            row = 1
+        elif 170 < cy < 230:
+            row = 2
+        elif 250 < cy < 310:
+            row = 3
+        # if abs(cy0-cy) > 20.0:
+        #     cx0, cy0 = cx, cy
+        #     row += 1
         sorted_contours[row].append(c)
 
     # Sort contours in a row from left to right
@@ -111,30 +136,54 @@ def bit_detecttion(source='data/images/panel.jpg'):
                 thickness=2, lineType=cv.LINE_AA)
 
 
-    # ------------------ Positioning --------------------- #
+    # # ------------------ Positioning --------------------- #
 
     # Positiong
     panel = [[0 for i in range(panel_size[1])] for j in range(panel_size[0])]
     row, col = (0, 0)       # Panel's row and column indicator
     cx0, cy0 = (side_len/2, side_len/2)
     for i, c in enumerate(contours):
+        cx, cy = cv.minAreaRect(c)[0]                   # Coordination of current bit's center
+        
+        if 10 < cy < 70:
+            row = 0
+        elif 90 < cy < 150:
+            row = 1
+        elif 170 < cy < 230:
+            row = 2
+        elif 250 < cy < 310:
+            row = 3
+
         if i >= len(contours)-1:
             col = round(abs(cx0 - cx1)/side_len)
             panel[row][col] = 1
             break
-        cx, cy = cv.minAreaRect(c)[0]                   # Coordination of current bit's center
-        cx1, cy1 = cv.minAreaRect(contours[i+1])[0]     # Coordination of next bit's center
         
+        cx1, cy1 = cv.minAreaRect(contours[i+1])[0]     # Coordination of next bit's center
+
         col = round(abs(cx0 - cx)/side_len)
         panel[row][col] = 1
 
-        if abs(cy - cy1) > 20:       # End of row
-            row += 1
+        # if abs(cy - cy1) > 60:       # End of row
+        #     row += 1
 
     # Print Result
     for row in panel:
         print(*row, sep=' ', end='\n')
 
+
+    # Seprate the panel to code and check
+    code = []
+    check = []
+    for i, row in enumerate(panel):
+        for bit in row:
+            if i == 0 or i == 1:
+                code.append(bit)
+            if i == 2 or i == 3:
+                check.append(bit)
+            
     # Show result
     cv.imshow("preprocessed", image)
     cv.waitKey(0)
+
+    return code, check
