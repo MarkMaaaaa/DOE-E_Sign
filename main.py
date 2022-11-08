@@ -27,7 +27,7 @@ import os
 import sys
 from pathlib import Path
 
-from utils.contour import bit_detecttion
+from utils.detection import color_detection
 from utils.homography import homography
 
 
@@ -40,19 +40,19 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--source', type=str, default=ROOT / 'data/images/panel1.jpg', help='file/dir/URL/glob')
+    parser.add_argument('--source', type=str, default=ROOT / 'data/images/test.jpg', help='file/dir/URL/glob')
     opt = parser.parse_args()
     return opt
 
 
 def main(opt):
-    bit_detecttion(**vars(opt))
+    color_detection(**vars(opt))
 
-    # # To crop the image, uncomment this part.
-    # # You need to find the four corners of the the panel manually.
-    # # The corners are top-left, top-right, bottom-left, and bottom-right of panel respectively.
-    # corners = [[3,5], [79,6], [2,18], [79,19]]
-    # homography('data/images/test4.jpeg', corners, save=True, output='data/images/hd4.jpg')
+    # To crop the image, uncomment this part.
+    # You need to find the four corners of the the panel manually.
+    # The corners are top-left, top-right, bottom-left, and bottom-right of panel respectively.
+    # corners = [[15,17], [755,21], [21,136], [746,145]]
+    # homography('data/raw/panel.jpg', corners, save=True, output='data/images/test.jpg')
 
 if __name__ == "__main__":
     opt = parse_opt()

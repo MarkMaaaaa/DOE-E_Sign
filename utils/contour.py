@@ -15,23 +15,24 @@ def bit_detecttion(source='data/images/panel.jpg'):
     # Read image
     source = str(source)
     image = cv.imread(source)
+    cv.imshow("source", image)
 
     # ------------------ Preprocessing --------------------- #
 
     # Denoise image
     # Remove noises by Gaussian filter
     mask = cv.GaussianBlur(image, (5,5), 0)
-
+    cv.imshow("mask0", mask)
     # Binary image
-    lower_bound = np.array([0,100,100])
-    upper_bound = np.array([179,255,255])
+    
     # Convert to HSV format and color threshold
     hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
-    # mask = cv.inRange(hsv, lower, upper)
-    # result = cv.bitwise_and(image, image, mask=mask)
+
+    lower_bound = np.array([0,0,0])
+    upper_bound = np.array([20,125,255])
 
     mask = cv.inRange(hsv, lower_bound, upper_bound)
-    # cv.imshow("mask0", mask)
+    cv.imshow("mask0", mask)
 
 
     # Enhance the mask by using Morphological transfomation
@@ -142,6 +143,7 @@ def bit_detecttion(source='data/images/panel.jpg'):
     panel = [[0 for i in range(panel_size[1])] for j in range(panel_size[0])]
     row, col = (0, 0)       # Panel's row and column indicator
     cx0, cy0 = (side_len/2, side_len/2)
+    # cx1, cy1 = 0, 0
     for i, c in enumerate(contours):
         cx, cy = cv.minAreaRect(c)[0]                   # Coordination of current bit's center
         
@@ -187,3 +189,4 @@ def bit_detecttion(source='data/images/panel.jpg'):
     cv.waitKey(0)
 
     return code, check
+    
