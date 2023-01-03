@@ -32,6 +32,14 @@ def bit_detecttion(source='data/images/panel.jpg'):
     upper_bound = np.array([20,125,255])
 
     mask = cv.inRange(hsv, lower_bound, upper_bound)
+#     Ke: To automatically calculate the mean and standard deviation of the pixel values in the image and use these values to set the lower and upper bounds for the color threshold, you could replace this block of code:
+# mean, stddev = cv.meanStdDev(hsv)
+# lower_bound = mean - 2*stddev
+# upper_bound = mean + 2*stddev
+# mask = cv.inRange(hsv, lower_bound, upper_bound)
+    
+    
+    
     cv.imshow("mask0", mask)
 
 
@@ -108,7 +116,18 @@ def bit_detecttion(source='data/images/panel.jpg'):
         #     cx0, cy0 = cx, cy
         #     row += 1
         sorted_contours[row].append(c)
-
+    # Ke: To group the contours into rows using the bounding boxes of the contours, you could replace this block of code:
+#     sorted_contours = []
+#     row_bounds = []
+#     for c in contours:
+#         x, y, w, h = cv.boundingRect(c)
+#         if len(row_bounds) == 0 or abs(y - row_bounds[-1]) > 20:
+#             row_bounds.append(y)
+#             sorted_contours.append([c])
+#         else:
+#             sorted_contours[-1].append(c)  
+        
+           
     # Sort contours in a row from left to right
     i = 0
     for row in sorted_contours:
@@ -135,7 +154,11 @@ def bit_detecttion(source='data/images/panel.jpg'):
         cv.putText(image, text=str(i+1), org=(cx,cy),
                 fontFace= cv.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0,0,255),
                 thickness=2, lineType=cv.LINE_AA)
+# Ke: To filter the contours based on whether they are convex, you could replace this block of code:
+#         contours = [c for c in contours if cv.isContourConvex(c)]
 
+       
+        
 
     # # ------------------ Positioning --------------------- #
 
